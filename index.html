@@ -92,6 +92,9 @@
         nav ul li a:hover {
             color: #38bdf8;
         }
+        .language-switch { display:flex; gap:4px; align-items:center; white-space:nowrap; }
+        .language-switch button { border:1px solid rgba(255,255,255,.5); border-radius:5px; background:transparent; color:#fff; padding:5px 8px; cursor:pointer; font-weight:700; }
+        .language-switch button[aria-pressed="true"] { background:#fff; color:#0d2c54; }
 
         /* Hero Section */
         .hero {
@@ -805,6 +808,7 @@
                     <li><a href="javascript:void(0)" onclick="switchPage('homepage-view', 'tien-ich')">Tools Tiện Ích</a></li>
                     <li><a href="javascript:void(0)" onclick="switchPage('homepage-view', 'bang-gia-pro')">Bảng Giá</a></li>
                     <li><a href="javascript:void(0)" onclick="openRegisterPage('TRIAL_FULL_3D', 'FREE', 'Dùng thử Full Option - 3 ngày', '0đ')">Đăng Ký</a></li>
+                    <li class="language-switch" aria-label="Language / Ngôn ngữ"><button type="button" data-lang="vi" aria-pressed="true" onclick="setLanguage('vi')">VN</button><button type="button" data-lang="en" aria-pressed="false" onclick="setLanguage('en')">EN</button></li>
                 </ul>
             </nav>
         </div>
@@ -837,11 +841,11 @@
                 <div class="module-card">
                     <div class="module-card-title-container">
                         <h3>Module Tính Toán Tải Trọng Gió & Động Đất</h3>
-                        <p>Hệ thống tính toán đầy đủ các thành phần tải trọng tác động lên công trình chuẩn xác theo tiêu chuẩn TCVN 2737 và quy chuẩn hiện hành.</p>
+                        <p>Tính toán tải trọng gió theo TCVN 2737 và EN 1991; tải trọng động đất theo TCVN 9386 và EN 1998.</p>
                     </div>
                     <ul class="module-features">
-                        <li>Tính toán chi tiết thành phần gió tĩnh và gió động theo tiêu chuẩn TCVN 2737.</li>
-                        <li>Phân tích, xác định phổ phản ứng liên tục phục vụ tính toán tải trọng động đất.</li>
+                        <li>Tính toán thành phần gió tĩnh và gió động theo TCVN 2737 và EN 1991.</li>
+                        <li>Phân tích phổ phản ứng để tính tải trọng động đất theo TCVN 9386 và EN 1998.</li>
                         <li>Tự động lập bảng và tạo tổ hợp tải trọng chuẩn hóa, kết xuất nhanh chóng sang file tính toán.</li>
                     </ul>
                     <div class="image-gallery">
@@ -1299,15 +1303,183 @@
 
     
 <script>
+/* English translations are paired with the original Vietnamese text. */
+const translations = {
+'CSA Tools - Phần mềm tính toán & triển khai kết cấu':'CSA Tools - Structural design and detailing software',
+'Trang Chủ':'Home','Phần mềm Thiết Kế':'Design Software','Phần mềm triển khai':'Detailing Software','Tools Tiện Ích':'Utility Tools','Bảng Giá':'Pricing','Đăng Ký':'Register',
+'PHẦN MỀM TÍNH TOÁN VÀ TRIỂN KHAI KẾT CẤU CSA TOOLS':'CSA TOOLS STRUCTURAL DESIGN AND DETAILING SOFTWARE',
+'Bộ công cụ tối ưu hóa toàn diện quy trình tính toán nội lực, thiết kế cấu kiện và tự động hóa triển khai bản vẽ kỹ thuật theo tiêu chuẩn thực tế dành cho Kỹ sư Xây dựng.':'An integrated toolkit for structural analysis, member design, and automated construction drawings for structural engineers.',
+'Tải Bản Dùng Thử':'Download Trial','Đăng Ký Tài Khoản':'Create Account','Công Cụ Tính Toán & Thiết Kế Chính':'Structural Analysis and Design Tools',
+'Module Tính Toán Tải Trọng Gió & Động Đất':'Wind and Seismic Load Module',
+'Tính toán tải trọng gió theo TCVN 2737 và EN 1991; tải trọng động đất theo TCVN 9386 và EN 1998.':'Calculate wind loads to TCVN 2737 and EN 1991, and seismic loads to TCVN 9386 and EN 1998.',
+'Tính toán thành phần gió tĩnh và gió động theo TCVN 2737 và EN 1991.':'Calculate static and dynamic wind components to TCVN 2737 and EN 1991.',
+'Phân tích phổ phản ứng để tính tải trọng động đất theo TCVN 9386 và EN 1998.':'Analyze response spectra for seismic loads to TCVN 9386 and EN 1998.',
+'Tự động lập bảng và tạo tổ hợp tải trọng chuẩn hóa, kết xuất nhanh chóng sang file tính toán.':'Generate load tables and combinations automatically and export them to calculation files.',
+'Module Kiểm Tra Ổn Định Tổng Thể':'Global Stability Check Module',
+'Bộ công cụ hỗ trợ kiểm tra các chỉ tiêu ổn định chuyển vị, lật, trượt và hiệu ứng bậc hai cho toàn bộ mô hình kết cấu công trình.':'Check displacement, overturning, sliding, and second-order effects across the structural model.',
+'Kiểm tra và đánh giá chi tiết chỉ số chuyển vị đỉnh, chuyển vị lệch tầng của công trình.':'Check roof displacement and interstory drift.',
+'Phân tích hệ số an toàn chống lật, chống trượt tổng thể dưới tác dụng của tải trọng ngang nguy hiểm.':'Assess global overturning and sliding safety under critical lateral loads.',
+'Tính toán kiểm tra hiệu ứng P-Delta (hiệu ứng bậc hai), tỷ số nén bảo đảm theo quy định TCVN 9386_2025.':'Check P-Delta effects and axial load ratios in accordance with TCVN 9386:2025.',
+'Module Tính Toán Thiết Kế Dầm':'Beam Design Module',
+'Tự động lấy nội lực và cập nhật từ Etabs, Safe; tính toán cốt thép dầm liên tục từ mô hình phân tích và xuất bản thuyết minh chi tiết.':'Import forces from ETABS and SAFE, design continuous beam reinforcement, and generate detailed calculation reports.',
+'Hỗ trợ đầy đủ tiêu chuẩn hiện hành Việt Nam (TCVN) và Tiêu chuẩn Châu Âu (Eurocode).':'Supports Vietnamese standards (TCVN) and Eurocodes.',
+'Tự động lấy nội lực nguy hiểm, đồng bộ dữ liệu mô hình trực tiếp không qua trung gian.':'Automatically retrieve critical forces and synchronize model data directly.',
+'Kiểm tra toàn diện các điều kiện uốn, cắt, nứt, xoắn của cấu kiện dầm BTCT liên tục.':'Check flexure, shear, cracking, and torsion in continuous reinforced concrete beams.',
+'Module Tính Toán Thiết Kế Cột Vách':'Column and Wall Design Module',
+'Giải pháp tính toán hàng loạt cấu kiện cột tròn, cột chữ nhật và vách chữ nhật chịu nén lệch tâm xiên, hỗ trợ bố trí thép từ AutoCAD chuyên nghiệp.':'Batch-design circular and rectangular columns and walls under biaxial bending and axial load, with reinforcement layouts imported from AutoCAD.',
+'Tính toán theo phương pháp biểu đồ tương tác chuẩn xác và kiểm tra cắt theo TCVN và Eurocode.':'Design with interaction diagrams and shear checks to TCVN and Eurocodes.',
+'Hỗ trợ thiết kế phân tích tối ưu hàng loạt cho tiết diện cột tròn, cột chữ nhật, vách chữ nhật.':'Batch-analyze and optimize circular columns, rectangular columns, and rectangular walls.',
+'Nhập và đồng bộ sơ đồ bố trí thép trực tiếp từ AutoCAD giúp quản lý hàm lượng thép bao hợp lý.':'Import and synchronize reinforcement layouts from AutoCAD to manage reinforcement ratios.',
+'Module Tính Toán Thiết Kế Sàn':'Slab Design Module',
+'Phân tích hệ sàn bê tông cốt thép toàn khối, sàn phẳng bản nấm và hệ dầm sàn phức tạp.':'Analyze cast-in-place reinforced concrete slabs, flat slabs, and complex beam-slab systems.',
+'Tính toán diện tích cốt thép sàn theo các tổ hợp nội lực từ SAFE hoặc Etabs.':'Calculate slab reinforcement areas from SAFE or ETABS load combinations.',
+'Xuất dữ liệu thép phân bố trực quan giúp dễ dàng rải thép đều và thép tăng cường lực momen.':'Export clear reinforcement data for base and additional moment reinforcement.',
+'Hỗ trợ trích xuất dữ liệu, kiểm tra ứng suất sàn nhanh chóng chuẩn quy trình thiết kế.':'Extract data and check slab stresses efficiently.',
+'Module Kiểm Tra Thiết Kế Cọc':'Pile Design Check Module',
+'Giải pháp tính toán sức chịu tải cấu kiện cọc ly tâm, cọc khoan nhồi, cọc vuông bê tông; kiểm tra nhanh sức chịu tải cọc và hỗ trợ bố trí cọc tự động trong AutoCAD.':'Calculate capacities of spun, bored, and precast square concrete piles and place piles automatically in AutoCAD.',
+'Tính toán chi tiết sức chịu tải của cọc ly tâm, cọc khoan nhồi, cọc vuông bê tông đúc sẵn.':'Calculate bearing capacity for spun, bored, and precast square concrete piles.',
+'Tích hợp thuật toán kiểm tra nhanh sức chịu tải cọc theo chỉ tiêu cơ lý đất nền và vật liệu.':'Quickly check pile capacity from soil and material properties.',
+'Tự động hóa tính toán, rải rắp vị trí tim cọc thông minh đồng bộ trực tiếp vào không gian AutoCAD.':'Automate calculations and pile-center placement directly in AutoCAD.',
+'Module Thiết Kế Móng':'Foundation Design Module',
+'Giải pháp tối ưu hóa phân tích kiểm tra độc lập nền móng cho hệ móng đơn và móng băng.':'Analyze and check isolated and strip foundations.',
+'Xác định nhanh kích thước đáy đệm móng, kiểm tra áp lực nền móng chuẩn quy phạm.':'Size footings and check soil bearing pressure against code limits.',
+'Tính toán diện tích cốt thép đài móng đơn, cốt thép móng băng theo tổ hợp lực momen.':'Calculate reinforcement for isolated and strip foundations under force and moment combinations.',
+'Báo cáo thuyết minh thông tin đồ họa rõ ràng phục vụ công tác hồ sơ bàn giao.':'Generate clear graphical calculation reports for project handover.',
+'Triển Khai Bản Vẽ Tự Động & Thống Kê':'Automated Drawings and Schedules',
+'Hệ Thống Vẽ Tự Động Kết Cấu (Dầm, Sàn, Cột, Vách, Móng, Cầu Thang,...)':'Automated Structural Drafting (Beams, Slabs, Columns, Walls, Foundations, Stairs, etc.)',
+'Liên kết trực tiếp dữ liệu từ các cấu kiện đã tính toán để tự động triển khai bản vẽ thiết kế, bản vẽ shopdrawing chi tiết sang AutoCAD kèm bảng thống kê cốt thép đầy đủ.':'Turn calculated member data into design drawings and detailed AutoCAD shop drawings with reinforcement schedules.',
+'Vẽ tự động mặt cắt, mặt đứng cấu kiện dầm, cột, vách chính xác theo đúng tỷ lệ bản vẽ cấu tạo.':'Automatically draw beam, column, and wall sections and elevations to scale.',
+'Tự động thống kê chi tiết từng thanh cốt thép, phân loại đường kính, hình dáng và xuất bảng thống kê trực tiếp trên bản vẽ.':'Schedule each rebar by diameter and shape directly on the drawing.',
+'Rút ngắn đáng kể thời gian triển khai hồ sơ kỹ thuật, giảm thiểu tối đa các sai lệch hình học thủ công.':'Reduce drafting time and manual geometry errors.',
+'Bộ Công Cụ Tiện Ích CAD / Automation Tools':'CAD Utilities and Automation Tools',
+'Bộ Tiện Ích In Ấn, Quản Lý Layout & Tự Động Hóa Sắp Xếp Bản Vẽ':'Batch Plotting, Layout Management, and Drawing Organization',
+'Tập hợp các giải pháp tăng tốc độ hoàn thiện và xuất hồ sơ bản vẽ thiết kế nhanh chóng ngay trên phần mềm CAD.':'Tools to prepare and export drawing packages directly from CAD.',
+'In ấn hàng loạt (Smart Plot) tự động nhận diện khung bản vẽ từ Model hoặc Layout, xuất định dạng PDF/DWG chỉ với 1 click.':'Smart Plot detects drawing frames in Model or Layout space and exports PDF/DWG files in one click.',
+'Công cụ quản lý, đồng bộ hệ thống Layout, Viewport linh hoạt và chuyên nghiệp cho toàn bộ dự án lớn.':'Manage and synchronize layouts and viewports across large projects.',
+'Tự động sắp xếp bản vẽ, quản lý thuộc tính Block thuộc tính (Attributed Block), đổi tên và đánh số thứ tự bản vẽ tự động hóa.':'Organize drawings, manage block attributes, and automatically rename and number sheets.',
+'Bảng Giá Phần Mềm Kết Cấu':'Structural Software Pricing',
+'Tách riêng theo nhu cầu: Tính toán kết cấu, Triển khai bản vẽ hoặc Full Option.':'Choose Structural Design, Drawing Production, or the Full Package.',
+'01. Gói Tính Toán Kết Cấu':'01. Structural Design Plans',
+'Chỉ bao gồm bộ công cụ tính toán & thiết kế. Không bao gồm triển khai bản vẽ AutoCAD.':'Analysis and design tools only; AutoCAD detailing is excluded.',
+'Tính toán':'Design','Gói 1 Tháng':'1-Month Plan','Gói 3 Tháng':'3-Month Plan','Gói 1 Năm':'1-Year Plan','Gói Doanh Nghiệp':'Enterprise Plan',
+'đ':'VND','30 ngày':'30 days','90 ngày':'90 days','365 ngày':'365 days','Theo năm':'Annual',
+'Sử dụng tối đa 2 máy tính':'Use on up to 2 computers','Được phép chuyển máy trong thời hạn gói':'Device transfers allowed during the subscription',
+'Bộ công cụ tính toán kết cấu CSA Tools':'CSA Tools structural design suite','Không bao gồm triển khai bản vẽ':'Drawing production excluded',
+'Đăng Ký Mua':'Buy Now','Tiết kiệm':'Save More','Tối ưu chi phí dài hạn':'Best long-term value',
+'Sử dụng tối đa 10 máy tính':'Use on up to 10 computers','Bộ công cụ tính toán kết cấu':'Structural design suite',
+'Hỗ trợ doanh nghiệp & cập nhật phiên bản':'Enterprise support and software updates','Liên Hệ Ngay':'Contact Us',
+'02. Gói Triển Khai Bản Vẽ':'02. Drawing Production Plans',
+'Dành riêng cho hệ thống triển khai bản vẽ, thống kê và Automation trên AutoCAD.':'AutoCAD drawing production, schedules, and automation tools.',
+'Triển khai riêng':'Detailing Only','Gói Triển Khai 1 Năm':'1-Year Detailing Plan',
+'Triển khai bản vẽ kết cấu tự động':'Automated structural drawings','Thống kê cốt thép & Automation Tools':'Rebar schedules and automation tools',
+'Không bao gồm bộ công cụ tính toán':'Design tools excluded',
+'03. Gói Full Option':'03. Full Package Plans','Bao gồm toàn bộ bộ công cụ tính toán + triển khai bản vẽ AutoCAD.':'Includes all structural design and AutoCAD detailing tools.',
+'Toàn bộ công cụ tính toán kết cấu':'Complete structural design suite','Toàn bộ công cụ triển khai bản vẽ':'Complete drawing production suite',
+'Phổ biến nhất':'Most Popular','Đầy đủ hệ sinh thái CSA Tools':'Complete CSA Tools suite','10 máy / năm':'10 devices / year',
+'Cấp quyền tối đa 10 máy':'Licenses for up to 10 devices','Tính toán + triển khai bản vẽ':'Design and drawing production',
+'Ưu tiên hỗ trợ kỹ thuật & cập nhật':'Priority technical support and updates',
+'Đăng Ký Tài Khoản Bản Quyền':'Register a License Account','Gói đăng ký cấp quyền':'License plan','Mã theo dõi thanh toán':'Payment reference',
+'Email / Tên đăng nhập':'Email / Username','Mật khẩu':'Password','Hiện':'Show','Ẩn':'Hide','Số điện thoại':'Phone Number',
+'Xác Nhận Đăng Ký & Tiếp Tục Thanh Toán':'Confirm Registration and Continue to Payment',
+'QUY TRÌNH:':'PROCESS:','Đăng ký → ghi Google Sheet → gửi email → chuyển khoản → Admin duyệt license.':'Register → record in Google Sheet → send email → bank transfer → admin approves license.',
+'Hướng Dẫn Chuyển Khoản Kích Hoạt':'Activation Payment Instructions',
+'Vui lòng thực hiện chuyển khoản bằng mã QR hoặc tài khoản ngân hàng chính thức sau đây:':'Please pay using the QR code or official bank account below:',
+'Ngân hàng thụ hưởng:':'Beneficiary Bank:','Ngân Hàng Phương Đông (OCB)':'Orient Commercial Joint Stock Bank (OCB)',
+'Số tài khoản Admin:':'Admin Account Number:','Gói mua bản quyền:':'Selected License Plan:','Số tiền cần chuyển:':'Amount Due:',
+'NỘI DUNG CHUYỂN KHOẢN CHUẨN:':'REQUIRED TRANSFER REFERENCE:',
+'ĐĂNG KÝ ĐÃ ĐƯỢC GHI NHẬN:':'REGISTRATION RECEIVED:',
+'Vui lòng chuyển khoản đúng số tiền và nội dung mã thanh toán bên dưới. Sau khi nhận được thanh toán, Admin sẽ kiểm tra và duyệt license.':'Transfer the exact amount and include the payment reference below. The admin will verify payment and approve the license.',
+'Tra Cứu Tài Khoản CSA Tools':'Look Up CSA Tools Account','Tra Cứu':'Look Up','Tên đăng nhập:':'Username:',
+'Mật khẩu:':'Password:','Hiện/Ẩn':'Show/Hide','Thời hạn:':'Expiry:','Type License:':'License Type:',
+'Hoạt động gần đây':'Recent Activity','Đang tải dữ liệu...':'Loading data...',
+'Về CSA TOOLS':'About CSA TOOLS',
+'Phần mềm hướng đến sự đơn giản, dễ sử dụng, tự động hóa cao và phù hợp hoàn toàn với nhu cầu làm việc thực tế của kỹ sư xây dựng tại Việt Nam.':'Simple, accessible automation tailored to the everyday work of structural engineers in Vietnam.',
+'Theo dõi kênh YouTube để cập nhật thêm các video hướng dẫn sử dụng và tính năng mới nhất của CSA Tools.':'Follow our YouTube channel for tutorials and the latest CSA Tools features.',
+'Đường Dẫn Tài Nguyên':'Resources','Kênh YouTube':'YouTube Channel','Link Tải Phần Mềm (Google Drive)':'Software Download (Google Drive)',
+'Group Zalo Hỗ Trợ Kỹ Thuật':'Technical Support Zalo Group','Tư Vấn & Hỗ Trợ Kỹ Thuật':'Consulting and Technical Support',
+'Điện thoại / Zalo:':'Phone / Zalo:','Hỗ trợ:':'Support:','24/7 Nhanh Chóng':'Fast 24/7 Support',
+'© 2026 CSA TOOLS. Phát triển bởi Đội ngũ Kỹ sư Kỹ thuật chuyên nghiệp. All rights reserved.':'© 2026 CSA TOOLS. Developed by a team of professional engineers. All rights reserved.',
+'Dùng thử Full Option - 3 ngày':'Full Package Trial - 3 days',
+'Vui lòng nhập đủ thông tin.':'Please complete all required fields.',
+'Đang tạo đăng ký...':'Creating registration...',
+'Đang ghi Google Sheet và gửi email...':'Saving registration and sending email...',
+'✅ Đăng ký thành công. Đang chuyển sang thanh toán...':'✅ Registration successful. Redirecting to payment...',
+'Không kết nối được hệ thống.':'Could not connect to the system.',
+'Đang tra cứu...':'Looking up account...',
+'Chưa cập nhật':'Not available yet',
+'✅ Tra cứu thành công.':'✅ Account found.',
+'❌ Sai tài khoản/mật khẩu hoặc chưa kết nối được hệ thống.':'❌ Invalid credentials or unable to connect to the system.',
+'Chưa tải được hoạt động gần đây.':'Recent activity could not be loaded.',
+'Không kết nối được Apps Script':'Could not connect to Apps Script',
+'Apps Script phản hồi quá lâu':'Apps Script took too long to respond'
+};
+for (const [prefix,english] of Object.entries({'Tải Trọng Gió':'Wind Load','Động Đất':'Seismic Load','Ổn Định Tổng Thể':'Global Stability','Ảnh Mô-đun Dầm':'Beam Module','Ảnh Cột Vách':'Column and Wall','Ảnh Mô-đun Sàn':'Slab Module','Thiết Kế Cọc':'Pile Design','Bố Trí Cọc Auto':'Automatic Pile Layout','Ảnh Thiết Kế Móng':'Foundation Design','Bản Vẽ Triển Khai':'Detail Drawing','Ảnh Tiện Ích':'Utility Tool'})) {
+  for(let n=1;n<=5;n++) translations[`${prefix} ${n}`]=`${english} ${n}`;
+}
+const attributeTranslations={
+'CSA Tools là bộ phần mềm hỗ trợ kỹ sư xây dựng tính toán kết cấu, thiết kế dầm, cột, vách, sàn, móng và triển khai bản vẽ AutoCAD tự động.':'CSA Tools helps structural engineers design beams, columns, walls, slabs, and foundations and automate AutoCAD drawings.',
+'CSA Tools - Phần mềm tính toán & triển khai kết cấu':'CSA Tools - Structural design and detailing software',
+'Bộ công cụ tính toán kết cấu và tự động hóa triển khai bản vẽ dành cho kỹ sư xây dựng.':'Structural design and automated drafting tools for engineers.',
+'Phần mềm hỗ trợ tính toán kết cấu và triển khai bản vẽ AutoCAD cho kỹ sư xây dựng.':'Structural design and AutoCAD drafting software for engineers.'
+};
+let currentLanguage='vi';
+function translateText(source){
+  const raw=source.trim();
+  return translations[raw]||attributeTranslations[raw]||raw;
+}
+function tr(source){return currentLanguage==='en'?translateText(source):source;}
+function localizeTree(root){
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(n){return n.parentElement?.closest('script,style')||!n.nodeValue.trim()?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
+  while(walker.nextNode()){
+    const node=walker.currentNode;
+    if(node.__viText===undefined)node.__viText=node.nodeValue;
+    const original=node.__viText;
+    const en=translateText(original);
+    if(en!==original.trim())node.nodeValue=currentLanguage==='en'?original.replace(original.trim(),en):original;
+  }
+  root.querySelectorAll('[placeholder],[title],[aria-label]').forEach(el=>{
+    for(const name of ['placeholder','title','aria-label']){
+      if(!el.hasAttribute(name))continue;
+      const key='data-original-'+name;
+      if(!el.hasAttribute(key))el.setAttribute(key,el.getAttribute(name));
+      const original=el.getAttribute(key);
+      el.setAttribute(name,currentLanguage==='en'?translateText(original):original);
+    }
+  });
+}
+function setLanguage(lang){
+  currentLanguage=lang==='en'?'en':'vi';
+  document.documentElement.lang=currentLanguage;
+  document.title=tr('CSA Tools - Phần mềm tính toán & triển khai kết cấu');
+  document.querySelectorAll('.language-switch button').forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.lang===currentLanguage)));
+  localizeTree(document.body);
+  const label=document.getElementById('reg-license-label');
+  if(label && label.value){
+    const original=label.dataset.originalValue||label.value;
+    label.dataset.originalValue=original;
+    label.value=tr(original);
+  }
+  document.querySelectorAll('meta[name="description"],meta[property="og:title"],meta[property="og:description"]').forEach(meta=>{
+    if(!meta.dataset.originalContent)meta.dataset.originalContent=meta.content;
+    meta.content=currentLanguage==='en'?translateText(meta.dataset.originalContent):meta.dataset.originalContent;
+  });
+  try{localStorage.setItem('csa-language',currentLanguage);}catch(e){}
+}
+try{currentLanguage=localStorage.getItem('csa-language')==='en'?'en':'vi';}catch(e){}
+document.addEventListener('DOMContentLoaded',()=>{
+  setLanguage(currentLanguage);
+  new MutationObserver(()=>localizeTree(document.body)).observe(document.body,{childList:true,subtree:true});
+});
+
 const GOOGLE_SCRIPT_URL="https://script.google.com/macros/s/AKfycbzvv_DZbdLNUFpdIfeM4NbPTxFEl9x4Zg5bM_LqwhdvwuvJl4YwDPDLbAJTS8iGUtCq/exec";
 
 function navigateToView(id){document.querySelectorAll('.page-view').forEach(v=>v.classList.remove('active'));const v=document.getElementById(id);if(v){v.classList.add('active');window.scrollTo(0,0);}}
 function switchPage(id,anchor){navigateToView(id);if(anchor)setTimeout(()=>document.getElementById(anchor)?.scrollIntoView({behavior:'smooth'}),100);}
 function generatePaymentCode(){const n=new Date();return 'CSA'+String(n.getFullYear()).slice(-2)+String(n.getMonth()+1).padStart(2,'0')+String(n.getDate()).padStart(2,'0')+Math.floor(1000+Math.random()*9000);}
 function startPurchase(code,label,amount){openRegisterPage(code,generatePaymentCode(),label,amount);}
-function openRegisterPage(code,pay,label,amount){navigateToView('register-page-view');document.getElementById('reg-license').value=code||'TRIAL_FULL_3D';document.getElementById('reg-license-label').value=label||code;document.getElementById('reg-amount').value=amount||'0đ';document.getElementById('reg-paycode').value=pay||generatePaymentCode();setFormMessage('','');}
+function openRegisterPage(code,pay,label,amount){navigateToView('register-page-view');document.getElementById('reg-license').value=code||'TRIAL_FULL_3D';const field=document.getElementById('reg-license-label');field.dataset.originalValue=label||code;field.value=tr(label||code);document.getElementById('reg-amount').value=amount||'0đ';document.getElementById('reg-paycode').value=pay||generatePaymentCode();setFormMessage('','');}
 function showPaymentPage(label,amount,pay){document.getElementById('pay-package-label').innerText=label;document.getElementById('pay-amount-label').innerText=amount;document.getElementById('pay-code-label').innerText=pay;navigateToView('payment-page-view');}
-function setFormMessage(type,txt){const b=document.getElementById('form-message');if(!b)return;b.className='status-box';b.innerHTML='';if(!txt)return;b.classList.add('show');if(type)b.classList.add(type);b.innerHTML=txt;}
+function setFormMessage(type,txt){const b=document.getElementById('form-message');if(!b)return;b.className='status-box';b.innerHTML='';if(!txt)return;b.classList.add('show');if(type)b.classList.add(type);b.textContent=tr(txt);}
 
 function jsonpRequest(params, timeoutMs=15000){
   return new Promise((resolve,reject)=>{
@@ -1363,7 +1535,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const pass=document.getElementById('password').value.trim();
     const phone=document.getElementById('phone').value.trim();
     const license=document.getElementById('reg-license').value.trim();
-    const license_name=document.getElementById('reg-license-label').value.trim();
+    const license_name=document.getElementById('reg-license-label').dataset.originalValue||document.getElementById('reg-license-label').value.trim();
     const amount=document.getElementById('reg-amount').value.trim();
     const paycode=document.getElementById('reg-paycode').value.trim();
     if(!user||!pass||!phone){setFormMessage('error','Vui lòng nhập đủ thông tin.');return;}
@@ -1375,7 +1547,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       },15000);
       if(!data.ok)throw new Error(data.message||'REGISTER_FAILED');
       setFormMessage('success','✅ Đăng ký thành công. Đang chuyển sang thanh toán...');
-      setTimeout(()=>showPaymentPage(license_name,amount,paycode),700);
+      setTimeout(()=>showPaymentPage(tr(license_name),amount,paycode),700);
     }catch(err){setFormMessage('error','❌ '+escapeHTML(err.message||'Không kết nối được hệ thống.'));}
     finally{btn.disabled=false;btn.textContent='Xác Nhận Đăng Ký & Tiếp Tục Thanh Toán';}
   });
