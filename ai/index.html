@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSA AI – Trợ lý CSA Tools</title>
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0d2c54; --navy-2:#13396b; --ink:#0f1b2d; --ink-2:#44546a; --muted:#7a879a;
+  --bg:#f3f5f9; --panel:#ffffff; --line:#e3e8f0; --soft:#eef2f8;
+  --accent:#e8a33d; --accent-ink:#5a3a00; --ok:#1f9d6b; --warn:#d48806; --err:#d4380d; --info:#2f6fd8;
+  --bot:#f7f9fc; --me:#0d2c54; --me-ink:#fff; --shadow:0 1px 2px rgba(13,44,84,.06),0 8px 24px rgba(13,44,84,.06);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --ink:#e6edf7; --ink-2:#b3c0d3; --muted:#8392a8; --bg:#0b1220; --panel:#111a2b; --line:#1f2b40; --soft:#16223a;
+  --bot:#14203a; --me:#2a5aa0; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --ink:#e6edf7; --ink-2:#b3c0d3; --muted:#8392a8; --bg:#0b1220; --panel:#111a2b; --line:#1f2b40; --soft:#16223a;
+  --bot:#14203a; --me:#2a5aa0; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark;
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Be Vietnam Pro",system-ui,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--info)}
+.hidden{display:none!important}
+/* ---------- login ---------- */
+#login{min-height:100%;display:grid;place-items:center;padding:24px;background:
+  radial-gradient(1200px 600px at 10% -10%,rgba(232,163,61,.18),transparent 60%),
+  radial-gradient(900px 600px at 110% 110%,rgba(13,44,84,.22),transparent 60%),var(--bg)}
+.lcard{width:min(420px,100%);background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:30px 28px}
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.brand img{width:46px;height:auto}
+.brand b{display:block;font-size:20px;letter-spacing:.3px;color:var(--navy)} :root[data-theme="dark"] .brand b{color:#dbe7ff}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .brand b{color:#dbe7ff}}
+.brand span{font-size:13px;color:var(--muted)}
+label.f{display:block;font-size:13px;color:var(--ink-2);margin:12px 0 6px}
+.in{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--soft);outline:none}
+.in:focus{border-color:var(--navy-2);box-shadow:0 0 0 3px rgba(31,111,235,.15)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-weight:600}
+.btn:hover{border-color:var(--navy-2)}
+.btn.pri{background:var(--navy);border-color:var(--navy);color:#fff} .btn.pri:hover{background:var(--navy-2)}
+.btn.acc{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.sm{padding:6px 10px;font-size:13px;border-radius:8px}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.err{color:var(--err);font-size:13px;min-height:20px;margin-top:10px}
+.lfoot{margin-top:16px;font-size:12.5px;color:var(--muted);line-height:1.6}
+/* ---------- app shell ---------- */
+#app{height:100%;display:grid;grid-template-columns:220px 1fr;grid-template-rows:56px 1fr}
+header{grid-column:1/3;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--navy);color:#fff}
+header img{height:30px;filter:brightness(0) invert(1)}
+header .t{font-weight:700;letter-spacing:.4px} header .t small{font-weight:500;opacity:.7;margin-left:6px}
+header .sp{flex:1} header .u{font-size:13px;opacity:.9;text-align:right;line-height:1.25}
+header .u small{opacity:.7}
+header .hb{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:13px}
+nav{background:var(--panel);border-right:1px solid var(--line);padding:12px 10px;display:flex;flex-direction:column;gap:4px}
+nav button{display:flex;align-items:center;gap:10px;text-align:left;padding:10px 12px;border-radius:10px;border:0;background:transparent;cursor:pointer;color:var(--ink-2);font-weight:500}
+nav button svg{width:18px;height:18px;flex:none}
+nav button.on{background:var(--soft);color:var(--ink);font-weight:600}
+nav .grow{flex:1} nav .mini{font-size:12px;color:var(--muted);padding:8px 10px;line-height:1.5}
+main{overflow:hidden;position:relative}
+.view{position:absolute;inset:0;overflow:auto;padding:20px}
+/* ---------- chat ---------- */
+#v-chat{display:flex;flex-direction:column;padding:0}
+#msgs{flex:1;overflow:auto;padding:22px max(16px,calc(50% - 420px)) 12px}
+.m{display:flex;gap:10px;margin:0 0 16px}
+.m .av{width:32px;height:32px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--soft);border:1px solid var(--line)}
+.m .av img{width:20px}
+.m .b{max-width:100%;background:var(--bot);border:1px solid var(--line);border-radius:14px;padding:12px 14px;min-width:0}
+.m.me{flex-direction:row-reverse} .m.me .b{background:var(--me);color:var(--me-ink);border-color:transparent}
+.m.me .av{display:none}
+.b p{margin:.35em 0} .b ul,.b ol{margin:.35em 0;padding-left:1.3em} .b li{margin:.15em 0}
+.b table{border-collapse:collapse;margin:.5em 0;font-size:13.5px;display:block;overflow:auto}
+.b th,.b td{border:1px solid var(--line);padding:4px 8px;text-align:left} .b th{background:var(--soft)}
+.b code{font-family:"JetBrains Mono",monospace;font-size:12.5px;background:var(--soft);padding:1px 5px;border-radius:5px}
+.b img.att{max-width:260px;border-radius:10px;display:block;margin-top:6px}
+.src{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.src i{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block} .src.ai i{background:var(--info)} .src.none i{background:var(--warn)}
+.vids{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:10px}
+.vid{display:flex;gap:8px;align-items:center;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:6px;background:var(--panel)}
+.vid img{width:84px;height:47px;object-fit:cover;border-radius:6px;flex:none}
+.vid span{font-size:12.5px;line-height:1.35}
+.rel{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer;color:var(--ink-2)}
+.chip:hover{border-color:var(--navy-2);color:var(--ink)}
+.fb{display:flex;gap:6px;margin-top:8px;align-items:center;font-size:12px;color:var(--muted)}
+.fb button{border:1px solid var(--line);background:transparent;border-radius:7px;padding:2px 8px;cursor:pointer;color:var(--ink-2)}
+.fb button.on{background:var(--soft)}
+.typing{display:inline-flex;gap:4px} .typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:bl 1s infinite} .typing i:nth-child(2){animation-delay:.15s} .typing i:nth-child(3){animation-delay:.3s}
+@keyframes bl{0%,100%{opacity:.25}50%{opacity:1}}
+#welcome{max-width:840px;margin:8px auto 18px}
+#welcome h2{margin:6px 0 4px;font-size:22px} #welcome p{margin:0 0 12px;color:var(--ink-2)}
+.qgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.q{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:10px 12px;cursor:pointer;text-align:left}
+.q b{display:block;font-size:13.5px} .q span{font-size:12.5px;color:var(--muted)}
+.q:hover{border-color:var(--navy-2)}
+#composer{border-top:1px solid var(--line);background:var(--panel);padding:10px max(16px,calc(50% - 420px)) 14px}
+.cbox{display:flex;gap:8px;align-items:flex-end;border:1px solid var(--line);background:var(--soft);border-radius:14px;padding:8px}
+.cbox textarea{flex:1;border:0;background:transparent;resize:none;outline:none;max-height:160px;min-height:24px;padding:4px 6px}
+.ib{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--panel);display:grid;place-items:center;cursor:pointer;flex:none}
+.ib svg{width:18px;height:18px} .ib.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.send{background:var(--navy);color:#fff;border-color:var(--navy)}
+.cmeta{display:flex;gap:10px;align-items:center;font-size:12px;color:var(--muted);margin-top:6px;flex-wrap:wrap}
+.pill{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:999px;padding:2px 9px;background:var(--panel)}
+.att-prev{display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap}
+.att-prev .a{display:flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:3px 8px;font-size:12.5px;background:var(--panel)}
+.att-prev img{height:28px;border-radius:4px}
+/* ---------- tools ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+.card h3{margin:0 0 4px;font-size:17px} .card .sub{color:var(--muted);font-size:13px;margin-bottom:10px}
+.drop{border:1.5px dashed var(--line);border-radius:12px;padding:20px;text-align:center;color:var(--ink-2);cursor:pointer;background:var(--soft)}
+.drop.on{border-color:var(--navy-2)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.row>div{min-width:140px}
+.stat{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.st{border:1px solid var(--line);border-radius:10px;padding:6px 10px;font-size:13px;cursor:pointer;background:var(--panel)}
+.st b{font-size:16px;margin-right:4px}
+.st.e b{color:var(--err)} .st.w b{color:var(--warn)} .st.i b{color:var(--info)} .st.on{outline:2px solid var(--navy-2)}
+.split{display:grid;grid-template-columns:minmax(300px,1fr) 1.3fr;gap:14px}
+.issues{max-height:62vh;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.iss{display:flex;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13.5px}
+.iss:hover{background:var(--soft)}
+.iss .n{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted);min-width:28px}
+.dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex:none} .dot.error{background:var(--err)} .dot.warn{background:var(--warn)} .dot.info{background:var(--info)}
+.prev{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#11161f;height:62vh;position:relative}
+.prev svg{width:100%;height:100%;cursor:grab}
+.prev .zb{position:absolute;right:8px;top:8px;display:flex;gap:6px}
+.lmap{width:100%;border-collapse:collapse;font-size:13.5px}
+.lmap th,.lmap td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+.lmap td.c{text-align:center}
+.lmap .sm{font-size:12px;color:var(--muted)}
+.notes li{margin:6px 0}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:8px 12px;align-items:center}
+.tip{font-size:12.5px;color:var(--muted)}
+.code{font-family:"JetBrains Mono",monospace;font-size:12.5px;background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:8px 10px;white-space:pre-wrap}
+/* nhúng trong website CSA Tools: thanh trên gọn lại (website đã có tiêu đề) */
+.embed header img,.embed header .t{display:none}
+.embed header .hb{white-space:nowrap}
+@media (max-width:860px){
+  #app{grid-template-columns:1fr;grid-template-rows:52px 1fr 58px}
+  nav{grid-row:3;flex-direction:row;border-right:0;border-top:1px solid var(--line);padding:6px;justify-content:space-around}
+  nav button{flex-direction:column;gap:2px;font-size:11px;padding:6px 4px} nav .grow,nav .mini{display:none}
+  header .u{display:none} .split{grid-template-columns:1fr} .kv{grid-template-columns:1fr}
+  .view{padding:14px} #msgs{padding:16px} #composer{padding:8px 10px 10px}
+}
+</style>
+</head>
+<body>
+<!-- ================= LOGIN ================= -->
+<section id="login">
+  <div class="lcard">
+    <div class="brand"><img src="logo.png" alt=""><div style="flex:1"><b>CSA AI</b><span>Trợ lý thông minh của CSA Tools</span></div><button type="button" class="btn sm" id="llang">English</button></div>
+    <form id="lf">
+      <label class="f">Tên đăng nhập (email)</label>
+      <input class="in" id="lu" autocomplete="username" required>
+      <label class="f">Mật khẩu</label>
+      <input class="in" id="lp" type="password" autocomplete="current-password" required>
+      <div class="err" id="lerr"></div>
+      <button class="btn pri" style="width:100%;margin-top:6px" id="lbtn">Đăng nhập</button>
+    </form>
+    <div class="lfoot">Dùng chung tài khoản bản quyền CSA Tools. Mỗi tài khoản chỉ đăng nhập 1 nơi.<br>
+      Chưa có tài khoản? <a id="lreg" target="_blank" rel="noopener">Đăng ký trên website</a> · Hỗ trợ Zalo <span id="lphone"></span></div>
+  </div>
+</section>
+
+<!-- ================= APP ================= -->
+<section id="app" class="hidden">
+  <header>
+    <img src="logo.png" alt=""><div class="t">CSA AI<small>trợ lý CSA Tools</small></div>
+    <div class="sp"></div>
+    <div class="u"><span id="hu"></span><br><small id="hx"></small></div>
+    <button class="hb" id="btheme" title="Đổi giao diện sáng/tối"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg></button>
+    <button class="hb" id="blang" title="Language">EN</button>
+    <button class="hb" id="blogout">Đăng xuất</button>
+  </header>
+  <nav>
+    <button data-v="chat" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.4A8 8 0 1 1 21 12Z"/></svg>Hỏi đáp</button>
+    <button data-v="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h16v16H4z"/><path d="m8 12 3 3 5-6"/></svg>Kiểm tra bản vẽ</button>
+    <button data-v="build"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6"/></svg>Dựng MBKC</button>
+    <button data-v="notes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h5"/></svg>Lưu ý của tôi</button>
+    <button data-v="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6a7 7 0 0 0 0 2.4l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2Z"/></svg>Kết nối AI</button>
+    <div class="grow"></div>
+    <div class="mini" id="kbinfo"></div>
+  </nav>
+  <main>
+    <!-- CHAT -->
+    <div class="view" id="v-chat">
+      <div id="msgs">
+        <div id="welcome">
+          <h2>Chào anh/chị 👋</h2>
+          <p>Hỏi gì về CSA Tools cũng được: cài đặt, đăng nhập, cách dùng file tính Excel, tool vẽ AutoCAD, lỗi thường gặp… Có thể dán <b>ảnh chụp lỗi</b>, gửi file <b>Excel</b> để kiểm tra dữ liệu nhập.</p>
+          <div class="qgrid" id="quick"></div>
+        </div>
+      </div>
+      <div id="composer">
+        <div class="att-prev" id="attprev"></div>
+        <div class="cbox">
+          <button class="ib" id="battach" title="Đính kèm ảnh / Excel / DXF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m21 11-8.5 8.5a5 5 0 0 1-7-7L14 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 7"/></svg></button>
+          <textarea id="tin" rows="1" placeholder="Nhập câu hỏi… (Enter để gửi, Shift+Enter xuống dòng)"></textarea>
+          <button class="ib" id="bweb" title="Tra Google (cần API key AI)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></button>
+          <button class="ib send" id="bsend" title="Gửi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+        <div class="cmeta"><span class="pill" id="aimode">Kho CSA (không tốn token)</span><span>Gõ <b>“lưu ý: …”</b> để nhắn CSA AI ghi nhớ.</span></div>
+        <input type="file" id="fattach" class="hidden" accept="image/*,.xlsx,.xlsm,.xls,.dxf">
+      </div>
+    </div>
+
+    <!-- CHECK -->
+    <div class="view hidden" id="v-check">
+      <div class="card">
+        <h3>Kiểm tra bản vẽ kết cấu</h3>
+        <div class="sub">Tải file <b>.DXF</b> (AutoCAD: SAVEAS → DXF). Kiểm tra layer, chữ, DIM, trục, nhãn dầm, ký hiệu cột/lỗ mở/sàn, khung tên theo quy tắc MBKC. File chỉ xử lý trên máy anh/chị, không gửi lên mạng.</div>
+        <div class="row">
+          <div style="flex:1"><div class="drop" id="cdrop">Kéo thả hoặc bấm để chọn file DXF</div><input type="file" id="cfile" class="hidden" accept=".dxf"></div>
+          <div><label class="f">Tỷ lệ 1:N</label><input class="in" id="cN" placeholder="tự nhận" style="width:120px"></div>
+          <div><button class="btn pri" id="crun" disabled>Kiểm tra</button></div>
+        </div>
+      </div>
+      <div id="cres" class="hidden">
+        <div class="card">
+          <div class="row" style="justify-content:space-between;align-items:center">
+            <div><b id="cfn"></b> <span class="tip" id="cinfo"></span></div>
+            <div class="row"><button class="btn sm" id="clisp">⬇ LISP đánh dấu lỗi</button><button class="btn sm" id="ccsv">⬇ Báo cáo CSV</button><button class="btn sm acc" id="cai">Nhờ AI nhận xét thêm</button></div>
+          </div>
+          <div class="stat" id="cstat"></div>
+          <div class="split">
+            <div class="issues" id="clist"></div>
+            <div class="prev" id="cprev"><div class="zb"><button class="btn sm" data-z="1.4">＋</button><button class="btn sm" data-z="0.7">－</button><button class="btn sm" data-z="0">⤢</button></div></div>
+          </div>
+          <div class="tip" style="margin-top:8px">Trong AutoCAD: <code>APPLOAD</code> file LISP → gõ <code>CSACHECK</code> để vẽ vòng đánh dấu + số thứ tự lỗi (layer CSA_CHECK, không in). Xoá: <code>CSACHECKCLEAR</code>.</div>
+        </div>
+        <div class="card hidden" id="caibox"><h3>Nhận xét của AI</h3><div class="b" id="caiout"></div></div>
+      </div>
+    </div>
+
+    <!-- BUILD -->
+    <div class="view hidden" id="v-build">
+      <div class="card">
+        <h3>Dựng mặt bằng kết cấu từ mặt bằng kiến trúc</h3>
+        <div class="sub">Tải mặt bằng kiến trúc <b>.DXF</b> → chọn layer trục, cột, tường, lỗ mở → CSA AI tạo file <b>LISP</b> vẽ MBKC trong AutoCAD theo quy tắc: kế thừa trục/cột, dầm chính nối cột, dầm đỡ tường, dầm bao lỗ &gt; 2 m², tiết diện sơ bộ, đặt tên dầm, DIM 4 phía, ký hiệu sàn, khung giấy.</div>
+        <div class="drop" id="bdrop">Kéo thả hoặc bấm để chọn file DXF kiến trúc</div><input type="file" id="bfile" class="hidden" accept=".dxf">
+      </div>
+      <div id="bcfg" class="hidden">
+        <div class="card">
+          <h3>1. Chọn layer</h3><div class="sub">Đã tự gợi ý theo tên layer – kiểm tra lại.</div>
+          <div style="overflow:auto"><table class="lmap" id="bmap"></table></div>
+        </div>
+        <div class="card">
+          <h3>2. Thông số (bắt buộc xác nhận)</h3>
+          <div class="kv">
+            <div>Khổ giấy *</div><div class="row"><label><input type="radio" name="bp" value="A3"> A3</label><label><input type="radio" name="bp" value="A2"> A2</label><label><input type="radio" name="bp" value="A1"> A1</label><span class="tip">Quy tắc: phải chọn trước, không mặc định A3.</span></div>
+            <div>Tỷ lệ 1:N</div><div><input class="in" id="bN" placeholder="tự chọn (bội số 5)" style="width:180px"></div>
+            <div>Tầng (dùng đặt tên D…)</div><div><input class="in" id="bfl" value="2" style="width:100px"></div>
+            <div>Cao độ (m) *</div><div class="row"><input class="in" id="bel" placeholder="vd 3.600" style="width:140px"><label><input type="radio" name="bet" value="finish" checked> là cao độ hoàn thiện (tự trừ 0.050)</label><label><input type="radio" name="bet" value="struct"> là cao độ kết cấu</label></div>
+            <div>Chiều dày sàn (mm) *</div><div><input class="in" id="bth" placeholder="nhập theo hồ sơ" style="width:140px"></div>
+            <div>Lớp trát *</div><div class="row"><label><input type="radio" name="bpl" value="0"> Kiến trúc không thể hiện / không hiệu chỉnh</label><label><input type="radio" name="bpl" value="1"> Có hiệu chỉnh</label><input class="in" id="bplv" placeholder="mm / phía" style="width:110px"></div>
+            <div>Tường nhận diện (mm)</div><div class="row"><input class="in" id="bwmin" value="90" style="width:90px"> – <input class="in" id="bwmax" value="300" style="width:90px"><span class="tip">khoảng cách 2 nét tường</span></div>
+            <div>Tên bản vẽ</div><div><input class="in" id="btitle" placeholder="MẶT BẰNG KẾT CẤU SÀN TẦNG 2"></div>
+            <div>Số bản vẽ</div><div><input class="in" id="bno" value="KC-1" style="width:120px"></div>
+            <div>Hatch cột</div><div><label><input type="checkbox" id="bhc" checked> Hatch mặt cắt cột (KCS_HATCH)</label></div>
+          </div>
+          <div class="err" id="berr"></div>
+          <button class="btn pri" id="brun">Dựng MBKC</button>
+        </div>
+      </div>
+      <div id="bres" class="hidden">
+        <div class="card">
+          <div class="row" style="justify-content:space-between;align-items:center"><h3 style="margin:0">Kết quả</h3><div class="row"><button class="btn sm pri" id="blisp">⬇ Tải LISP (CSA_MBKC)</button><button class="btn sm" id="bsvg">⬇ Ảnh preview</button></div></div>
+          <div class="prev" id="bprev" style="margin-top:10px"><div class="zb"><button class="btn sm" data-z="1.4">＋</button><button class="btn sm" data-z="0.7">－</button><button class="btn sm" data-z="0">⤢</button></div></div>
+          <div class="tip" style="margin-top:8px">AutoCAD: mở bản vẽ (có thể chính file kiến trúc) → <code>APPLOAD</code> chọn file LISP → gõ <code>CSA_MBKC</code>. MBKC vẽ đúng toạ độ kiến trúc, đúng 15 layer KCS, style Arial 0.7, DIM 2.2-N, LTSCALE = 10N.</div>
+        </div>
+        <div class="split">
+          <div class="card"><h3>Giả thiết đã áp dụng</h3><ul class="notes" id="bnotes"></ul></div>
+          <div class="card"><h3>Cần kỹ sư xác nhận</h3><ul class="notes" id="bask"></ul></div>
+        </div>
+        <div class="card"><h3>Bảng dầm</h3><div style="overflow:auto"><table class="lmap" id="btab"></table></div></div>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="view hidden" id="v-notes">
+      <div class="card">
+        <h3>Lưu ý của tôi</h3>
+        <div class="sub">CSA AI sẽ tôn trọng các lưu ý này khi trả lời (vd: “tôi dùng ETABS 21”, “công ty dùng TCVN 5574-2018”, “khung tên A2”). Lưu ý cũng được gửi Admin để cải thiện hướng dẫn chung.</div>
+        <div class="row"><input class="in" id="nin" placeholder="Thêm lưu ý…" style="flex:1"><button class="btn pri" id="nadd">Lưu</button></div>
+        <ul class="notes" id="nlist"></ul>
+      </div>
+      <div class="card"><h3>Lưu ý chung của CSA</h3><ul class="notes" id="glist"></ul></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="view hidden" id="v-settings">
+      <div class="card">
+        <h3>Kết nối AI của riêng anh/chị (tuỳ chọn)</h3>
+        <div class="sub">Câu hỏi về CSA Tools được trả lời từ kho CSA – <b>không tốn token</b>. Chỉ khi kho chưa có câu trả lời, hoặc cần phân tích ảnh / tra Google, CSA AI mới gọi AI bằng API key của anh/chị. Key chỉ lưu trong trình duyệt này, không gửi về máy chủ CSA.</div>
+        <div class="kv">
+          <div>Dùng AI</div><div><select class="in" id="sprov" style="max-width:280px"><option value="">Không dùng (chỉ kho CSA)</option><option value="gemini">Google Gemini</option><option value="claude">Anthropic Claude</option><option value="openai">OpenAI ChatGPT</option></select></div>
+          <div>Gemini API key</div><div><input class="in" id="kgemini" type="password" placeholder="AIza…"> <span class="tip">Lấy tại aistudio.google.com → Get API key (có gói miễn phí)</span></div>
+          <div>Gemini model</div><div><input class="in" id="mgemini" placeholder="gemini-2.5-flash" style="max-width:280px"></div>
+          <div>Claude API key</div><div><input class="in" id="kclaude" type="password" placeholder="sk-ant-…"> <span class="tip">console.anthropic.com</span></div>
+          <div>Claude model</div><div><input class="in" id="mclaude" placeholder="claude-haiku-5-5" style="max-width:280px"></div>
+          <div>OpenAI API key</div><div><input class="in" id="kopenai" type="password" placeholder="sk-…"> <span class="tip">platform.openai.com</span></div>
+          <div>OpenAI model</div><div><input class="in" id="mopenai" placeholder="gpt-4.1-mini" style="max-width:280px"></div>
+          <div>Tra Google mặc định</div><div><label><input type="checkbox" id="sweb"> Bật tra cứu web cho câu hỏi ngoài CSA</label></div>
+          <div>Đọc chữ trong ảnh</div><div><label><input type="checkbox" id="socr" checked> Dùng OCR miễn phí khi không có AI</label></div>
+        </div>
+        <div class="row" style="margin-top:12px"><button class="btn pri" id="ssave">Lưu</button><button class="btn" id="stest">Thử kết nối</button><span class="tip" id="smsg"></span></div>
+      </div>
+    </div>
+  </main>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/dxf.js"></script>
+<script src="js/kb.js"></script>
+<script src="js/llm.js"></script>
+<script src="js/checker.js"></script>
+<script src="js/builder.js"></script>
+<script src="js/render.js"></script>
+<script src="js/excelcheck.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
