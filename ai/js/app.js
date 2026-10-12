@@ -3,6 +3,7 @@
   "use strict";
   var C = window.CSA_CONFIG, $ = function (s) { return document.querySelector(s); }, $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
   var DEMO = !!window.CSA_DEMO;
+  var FREE = !DEMO && C.FREE !== false;
   var S = { sess: null, eng: null, kbAll: [], notes: [], gnotes: [], hist: [], att: null, web: false, cfg: loadCfg(), lang: "vi" };
   var I = window.CSAI18N, T = function (k, v, lang) { return I.T(k, lang || S.lang, Object.assign({ phone: C.PHONE }, v || {})); };
   function msg(code) { return S.lang === "en" && I.MSG_EN[code] ? I.MSG_EN[code].replace("{phone}", C.PHONE) : (MSG[code] || code); }
@@ -54,7 +55,8 @@
     });
   }
   function api(action, extra) {
-    var p = Object.assign({ action: action, user: S.sess && S.sess.user, sid: S.sess && S.sess.sid, token: S.sess && S.sess.token }, extra || {});
+    var p = FREE ? Object.assign({ action: action, user: S.sess && S.sess.user, free: 1 }, extra || {})
+      : Object.assign({ action: action, user: S.sess && S.sess.user, sid: S.sess && S.sess.sid, token: S.sess && S.sess.token }, extra || {});
     return jsonp(p).then(function (r) {
       if (r && (r.message === "DANG_NHAP_NOI_KHAC" || r.message === "PHIEN_HET_HAN" || r.message === "HET_HAN" || r.message === "CHUA_DUOC_DUYET")) { logout(msg(r.message)); throw new Error(r.message); }
       return r;
@@ -64,7 +66,7 @@
     SAI_THONG_TIN: "Sai tên đăng nhập hoặc mật khẩu.", CHUA_DUOC_DUYET: "Tài khoản chưa được duyệt (chưa thanh toán hoặc Admin chưa kích hoạt). Liên hệ Zalo " + C.PHONE + ".",
     HET_HAN: "Bản quyền đã hết hạn – liên hệ Admin để gia hạn.", KHOA_TAM_15_PHUT: "Sai quá nhiều lần – vui lòng thử lại sau 15 phút.",
     DANG_NHAP_NOI_KHAC: "Tài khoản vừa đăng nhập ở nơi khác – phiên này đã thoát (mỗi tài khoản 1 nơi).", PHIEN_HET_HAN: "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.",
-    THIEU_THONG_TIN: "Nhập đủ tên đăng nhập và mật khẩu.", NETWORK: "Không kết nối được máy chủ CSA – kiểm tra mạng rồi thử lại.", TIMEOUT: "Máy chủ phản hồi chậm – thử lại sau ít phút."
+    THIEU_THONG_TIN: "Nhập đủ tên đăng nhập và mật khẩu.", NETWORK: "Không kết nối được máy chủ CSA – kiểm tra mạng rồi thử lại.", TIMEOUT: "Máy chủ phản hồi chậm – thử lại sau ít phút.", KB_FAIL: "Đăng nhập đúng nhưng chưa tải được kho kiến thức từ máy chủ – báo Admin kiểm tra sheet AI_KB."
   };
   function download(name, text, type) {
     var b = new Blob([text], { type: type || "text/plain" }), a = document.createElement("a");
@@ -82,7 +84,7 @@
       S.sess = { user: r.user, sid: r.sid, token: r.token, expiry: r.expiry, license: r.license };
       ls("csa_ai_sess", S.sess); $("#lp").value = "";
       return enter();
-    }).catch(function (e) { $("#lerr").textContent = msg(e.message); })
+    }).catch(function (e) { $("#lerr").textContent = msg(e.message === "NETWORK" && S.sess ? "KB_FAIL" : e.message); })
       .then(function () { $("#lbtn").disabled = false; $("#lbtn").textContent = "Đăng nhập"; });
   });
   function logout(msg) {
@@ -92,6 +94,42 @@
     $("#lerr").textContent = msg || "";
   }
   $("#blogout").onclick = function () { logout(); };
+  // ---- chế độ miễn phí: kho tĩnh hiển thị ngay, kho trên sheet (AI_KB + đã học + lưu ý chung) nạp thêm nếu được ----
+  function addNote(text) {
+    var n = { row: 0, text: text }; S.notes.push(n); ls("csa_ai_notes", S.notes);
+    return api("ai_note", { note: text }).then(function (r) { if (r && r.row) { n.row = r.row; ls("csa_ai_notes", S.notes); } return n; }).catch(function () { return n; });
+  }
+  function guestId() {
+    var d = ls("csa_ai_dev");
+    if (!d) { d = "khach-" + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3); ls("csa_ai_dev", d); }
+    return d;
+  }
+  function mergeKb(serverKb, learned) {
+    var byId = {}, out = [];
+    (window.CSA_KB_STATIC || []).forEach(function (e) { byId[e.id] = e; });
+    (serverKb || []).forEach(function (e) { if (e && e.id) byId[e.id] = Object.assign({}, byId[e.id] || {}, e); });
+    for (var k in byId) out.push(byId[k]);
+    S.learnedN = (learned || []).length;
+    return out.concat(learned || []);
+  }
+  function showApp() {
+    S.eng = new CSAKB.Engine(S.kbAll);
+    $("#login").classList.add("hidden"); $("#app").classList.remove("hidden");
+    $("#hu").textContent = FREE ? T("freeUser") : S.sess.user;
+    $("#hx").textContent = FREE ? "" : [S.sess.license, S.sess.expiry ? T("expiry", { d: S.sess.expiry }) : ""].filter(Boolean).join(" · ");
+    kbInfo(); renderNotes(); renderQuick(); refreshMode();
+  }
+  function enterFree() {
+    S.sess = { user: guestId(), free: true };
+    S.notes = ls("csa_ai_notes") || []; S.gnotes = [];
+    S.kbAll = mergeKb([], []); showApp();
+    $("#blogout").classList.add("hidden");
+    jsonp({ action: "ai_kb", user: S.sess.user, free: 1 }, 20000).then(function (r) {
+      if (!r || !r.ok) return;
+      S.kbAll = mergeKb(r.kb, r.learned); S.eng = new CSAKB.Engine(S.kbAll);
+      S.gnotes = r.globalNotes || []; kbInfo(); renderNotes();
+    }).catch(function () { /* không nạp được sheet → vẫn dùng kho tĩnh */ });
+  }
   function enter() {
     return api("ai_kb").then(function (r) {
       if (!r.ok) throw new Error(r.message);
@@ -187,7 +225,7 @@
       var note = text.replace(NOTE, "").trim();
       if (note) {
         var w = typing();
-        try { var r = await api("ai_note", { note: note }); S.notes.push({ row: r.row, text: note }); renderNotes(); w.innerHTML = md(T("noteSaved", { note: note }, L)); }
+        try { var r = FREE ? await addNote(note) : await api("ai_note", { note: note }); if (!FREE) S.notes.push({ row: r.row, text: note }); renderNotes(); w.innerHTML = md(T("noteSaved", { note: note }, L)); }
         catch (e) { w.innerHTML = md(T("noteFail", { err: msg(e.message) }, L)); }
         return;
       }
@@ -429,11 +467,12 @@
   // ---------------- LƯU Ý ----------------
   function renderNotes() {
     $("#nlist").innerHTML = S.notes.map(function (n, i) { return "<li>" + esc(n.text) + " <button class='btn sm' data-i='" + i + "'>" + T("del") + "</button></li>"; }).join("") || "<li class='tip'>" + T("noNotes") + "</li>";
-    $$("#nlist button").forEach(function (b) { b.onclick = function () { var n = S.notes[+b.dataset.i]; api("ai_note_del", { row: n.row }).catch(function () {}); S.notes.splice(+b.dataset.i, 1); renderNotes(); }; });
+    $$("#nlist button").forEach(function (b) { b.onclick = function () { var n = S.notes[+b.dataset.i]; if (n.row) api("ai_note_del", { row: n.row }).catch(function () {}); S.notes.splice(+b.dataset.i, 1); if (FREE) ls("csa_ai_notes", S.notes); renderNotes(); }; });
     $("#glist").innerHTML = S.gnotes.map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("") || "<li class='tip'>" + T("noG") + "</li>";
   }
   $("#nadd").onclick = function () {
     var t = $("#nin").value.trim(); if (!t) return;
+    if (FREE) { addNote(t); $("#nin").value = ""; renderNotes(); return; }
     api("ai_note", { note: t }).then(function (r) { S.notes.push({ row: r.row, text: t }); $("#nin").value = ""; renderNotes(); }).catch(function (e) { alert(msg(e.message)); });
   };
 
@@ -468,5 +507,6 @@
   $("#llang").textContent = S.lang === "en" ? "Tiếng Việt" : "English";
   var saved = ls("csa_ai_sess");
   if (DEMO) { S.sess = { user: "demo@csa", sid: "demo", token: "demo", expiry: "", license: "DEMO" }; enter(); }
+  else if (FREE) { enterFree(); }
   else if (saved) { S.sess = saved; enter().catch(function (e) { logout(e.message ? msg(e.message) : ""); }); }
 })();

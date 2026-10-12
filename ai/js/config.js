@@ -1,5 +1,6 @@
 /* CSA AI – cấu hình. SERVER_URL = cùng URL Apps Script với website (GOOGLE_SCRIPT_URL trong index.html). */
 window.CSA_CONFIG = {
+  FREE: true,   // true = CSA AI miễn phí, không cần đăng nhập. false = bắt đăng nhập tài khoản bản quyền (cột D/E, cột I = OK)
   SERVER_URL: "https://script.google.com/macros/s/AKfycbzvv_DZbdLNUFpdIfeM4NbPTxFEl9x4Zg5bM_LqwhdvwuvJl4YwDPDLbAJTS8iGUtCq/exec",
   SITE_URL: "https://csatoolscivil.github.io/app.CSATools/",
   ZALO: "https://zalo.me/g/ci4u5p4tarpfccw44w7l",

@@ -62,7 +62,7 @@
     more: ["…còn {n} mục.", "…{n} more."], excelTitle: ["Kiểm tra file Excel", "Excel file check"], dxfTitle: ["Kiểm tra bản vẽ", "Drawing check"],
     dxfMsg: ["Bản vẽ **{f}** (tỷ lệ nhận diện 1:{n}): **{e}** lỗi, **{w}** cảnh báo.", "Drawing **{f}** (detected scale 1:{n}): **{e}** errors, **{w}** warnings."],
     dxfNone: ["Không có lỗi nghiêm trọng.", "No critical errors."], dxfOpen: ["Mở mục **Kiểm tra bản vẽ** để xem vị trí từng lỗi và tải file LISP đánh dấu (nội dung lỗi bằng tiếng Việt).", "Open **Drawing check** to see each error's location and download the marker LISP (issue texts are in Vietnamese)."],
-    kbinfo: ["Kho CSA: {n} mục", "CSA base: {n} entries"], learned: [" ({n} đã học)", " ({n} learned)"], expiry: ["hạn {d}", "expires {d}"],
+    kbinfo: ["Kho CSA: {n} mục", "CSA base: {n} entries"], learned: [" ({n} đã học)", " ({n} learned)"], expiry: ["hạn {d}", "expires {d}"], freeUser: ["Miễn phí cho mọi người", "Free for everyone"],
     modeKb: ["Kho CSA (không tốn token)", "CSA knowledge base (no tokens)"], modeAi: ["Kho CSA → {p}", "CSA base → {p}"],
     noIssue: ["Không có mục nào 🎉", "Nothing here 🎉"], lvl: [["lỗi", "cảnh báo", "ghi chú"], ["errors", "warnings", "notes"]],
     noNotes: ["Chưa có lưu ý.", "No notes yet."], noG: ["Chưa có.", "None yet."], del: ["Xoá", "Delete"],
@@ -79,7 +79,7 @@
     SAI_THONG_TIN: "Wrong username or password.", CHUA_DUOC_DUYET: "Your account has not been approved yet (not paid or not activated). Contact Zalo {phone}.",
     HET_HAN: "Your license has expired – contact the Admin to renew.", KHOA_TAM_15_PHUT: "Too many failed attempts – try again in 15 minutes.",
     DANG_NHAP_NOI_KHAC: "This account just signed in somewhere else – this session has ended (one place per account).", PHIEN_HET_HAN: "Your session has expired, please log in again.",
-    THIEU_THONG_TIN: "Enter both username and password.", NETWORK: "Can't reach the CSA server – check your connection and try again.", TIMEOUT: "The server is slow to respond – try again in a few minutes."
+    THIEU_THONG_TIN: "Enter both username and password.", NETWORK: "Can't reach the CSA server – check your connection and try again.", TIMEOUT: "The server is slow to respond – try again in a few minutes.", KB_FAIL: "Signed in, but the knowledge base could not be loaded from the server – please tell the Admin to check the AI_KB sheet."
   };
   var VI_RE = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i;
   var EN_W = /\b(how|what|why|which|where|when|can|cannot|can't|does|doesn't|do|don't|is|are|the|my|error|install|login|please|should|help|not|work|working|load|design|draw|price|file)\b/gi;
